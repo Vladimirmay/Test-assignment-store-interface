@@ -56,9 +56,13 @@ export function CheckoutPage() {
   ]);
 
   const delivery = useMemo<Delivery | undefined>(() => {
-    if (deliveryMethod === 'pickup') return pickupPointId ? { method: 'pickup', pickupPointId } : undefined;
+    if (deliveryMethod === 'pickup')
+      return pickupPointId ? { method: 'pickup', pickupPointId } : undefined;
     if (city && street && house)
-      return { method: 'courier', address: { city, street, house, apartment: apartment || undefined } };
+      return {
+        method: 'courier',
+        address: { city, street, house, apartment: apartment || undefined },
+      };
     return undefined;
   }, [deliveryMethod, pickupPointId, city, street, house, apartment]);
 
@@ -90,7 +94,8 @@ export function CheckoutPage() {
     JSON.stringify(quote.delivery) === JSON.stringify(debouncedDelivery) &&
     Date.parse(quote.expiresAt) > Date.now();
 
-  const pickupPoints = checkoutOptions.data.deliveryMethods.find((m) => m.id === 'pickup')?.pickupPoints ?? [];
+  const pickupPoints =
+    checkoutOptions.data.deliveryMethods.find((m) => m.id === 'pickup')?.pickupPoints ?? [];
 
   const onSubmit = handleSubmit((values) => {
     if (!quote || !quoteIsCurrent) return;
@@ -107,7 +112,10 @@ export function CheckoutPage() {
         onSuccess: (order) => navigate(`/orders/${order.id}`),
         onError: (error) => {
           applyServerFieldErrors(error, setError);
-          if (error instanceof RequestError && ['CART_VERSION_CONFLICT', 'QUOTE_EXPIRED'].includes(error.code))
+          if (
+            error instanceof RequestError &&
+            ['CART_VERSION_CONFLICT', 'QUOTE_EXPIRED'].includes(error.code)
+          )
             setQuote(undefined);
         },
       },
@@ -129,7 +137,9 @@ export function CheckoutPage() {
             type="email"
             {...register('email', { required: 'Укажите email', pattern: /^\S+@\S+\.\S+$/ })}
           />
-          {errors.email && <span className="form-error">{errors.email.message ?? 'Некорректный email'}</span>}
+          {errors.email && (
+            <span className="form-error">{errors.email.message ?? 'Некорректный email'}</span>
+          )}
         </label>
         <label className="form-field">
           Телефон
@@ -138,7 +148,9 @@ export function CheckoutPage() {
             placeholder="+79990000000"
             {...register('phone', { required: 'Укажите телефон', pattern: /^\+[1-9]\d{9,14}$/ })}
           />
-          {errors.phone && <span className="form-error">{errors.phone.message ?? 'Формат: +79990000000'}</span>}
+          {errors.phone && (
+            <span className="form-error">{errors.phone.message ?? 'Формат: +79990000000'}</span>
+          )}
         </label>
       </fieldset>
 

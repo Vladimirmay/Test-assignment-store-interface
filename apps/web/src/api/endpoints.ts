@@ -1,4 +1,14 @@
-import type { Cart, CreateOrder, Delivery, Order, Payment, Product, Quote, Scenario, Simulation } from '@checkout/contracts';
+import type {
+  Cart,
+  CreateOrder,
+  Delivery,
+  Order,
+  Payment,
+  Product,
+  Quote,
+  Scenario,
+  Simulation,
+} from '@checkout/contracts';
 import { request } from './client';
 import type { CheckoutOptions, Sandbox, Session } from './types';
 
@@ -33,7 +43,12 @@ export const getOrder = (token: string, orderId: string) =>
   request<Order>(`/api/orders/${orderId}`, { token });
 
 export const createPayment = (token: string, orderId: string, idempotencyKey: string) =>
-  request<Payment>(`/api/orders/${orderId}/payments`, { method: 'POST', token, body: {}, idempotencyKey });
+  request<Payment>(`/api/orders/${orderId}/payments`, {
+    method: 'POST',
+    token,
+    body: {},
+    idempotencyKey,
+  });
 
 export const getPayment = (token: string, paymentId: string) =>
   request<Payment>(`/api/payments/${paymentId}`, { token });

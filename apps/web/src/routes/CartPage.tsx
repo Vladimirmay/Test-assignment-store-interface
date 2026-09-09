@@ -41,7 +41,10 @@ export function CartPage() {
               />
             </label>
             <span>{formatMoney(item.lineTotal)}</span>
-            <button disabled={removeItem.isPending} onClick={() => removeItem.mutate(item.productId)}>
+            <button
+              disabled={removeItem.isPending}
+              onClick={() => removeItem.mutate(item.productId)}
+            >
               Удалить
             </button>
           </li>
