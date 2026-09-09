@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { Link, useNavigate } from 'react-router-dom';
+import { useQueryClient } from '@tanstack/react-query';
 import type { Delivery, Quote } from '@checkout/contracts';
 import { createIdempotencyKey } from '../api/idempotency';
 import { RequestError } from '../api/client';
@@ -10,9 +11,18 @@ import { formatMoney } from '../lib/money';
 import { useCart } from '../queries/useCart';
 import { useCheckoutOptions } from '../queries/useCheckoutOptions';
 import { useCreateOrder } from '../queries/useOrder';
+import { queryKeys } from '../queries/queryKeys';
 import { useCreateQuote } from '../queries/useQuote';
+import { useSession } from '../session/SessionProvider';
 import { ErrorBanner } from '../ui/ErrorBanner';
 import { Loading } from '../ui/Loading';
+
+/** A stale cart version means the quote can't be trusted — refetch the cart so the next quote attempt uses the truth. */
+function isStaleCartError(error: unknown): boolean {
+  return (
+    error instanceof RequestError && ['CART_VERSION_CONFLICT', 'QUOTE_EXPIRED'].includes(error.code)
+  );
+}
 
 type CheckoutFormValues = {
   name: string;
@@ -33,6 +43,8 @@ export function CheckoutPage() {
   const createQuoteMutation = useCreateQuote();
   const createOrderMutation = useCreateOrder();
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
+  const { token } = useSession();
   const orderKeyRef = useRef(createIdempotencyKey());
   const [quote, setQuote] = useState<Quote>();
 
@@ -72,7 +84,13 @@ export function CheckoutPage() {
     if (!debouncedDelivery || !cart.data || cart.data.items.length === 0) return;
     createQuoteMutation.mutate(
       { cartVersion: cart.data.version, delivery: debouncedDelivery },
-      { onSuccess: setQuote },
+      {
+        onSuccess: setQuote,
+        onError: (error) => {
+          if (isStaleCartError(error))
+            queryClient.invalidateQueries({ queryKey: queryKeys.cart(token) });
+        },
+      },
     );
     // Re-runs whenever the debounced delivery or the cart version changes — that's the whole trigger.
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -112,11 +130,10 @@ export function CheckoutPage() {
         onSuccess: (order) => navigate(`/orders/${order.id}`),
         onError: (error) => {
           applyServerFieldErrors(error, setError);
-          if (
-            error instanceof RequestError &&
-            ['CART_VERSION_CONFLICT', 'QUOTE_EXPIRED'].includes(error.code)
-          )
+          if (isStaleCartError(error)) {
             setQuote(undefined);
+            queryClient.invalidateQueries({ queryKey: queryKeys.cart(token) });
+          }
         },
       },
     );

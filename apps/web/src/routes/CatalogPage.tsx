@@ -1,3 +1,4 @@
+import { useMemo } from 'react';
 import { formatMoney } from '../lib/money';
 import { useCart, useSetCartItem } from '../queries/useCart';
 import { useProducts } from '../queries/useProducts';
@@ -9,31 +10,45 @@ export function CatalogPage() {
   const cart = useCart();
   const setItem = useSetCartItem();
 
+  // Built once per cart change so looking up a product's quantity below is O(1),
+  // not a linear .find() repeated for every product in the catalog.
+  const quantityByProductId = useMemo(
+    () => new Map(cart.data?.items.map((item) => [item.productId, item.quantity])),
+    [cart.data],
+  );
+
   if (products.isPending) return <Loading label="Загружаем каталог…" />;
   if (products.isError) return <ErrorBanner error={products.error} />;
 
-  const quantityOf = (productId: string) =>
-    cart.data?.items.find((item) => item.productId === productId)?.quantity ?? 0;
-
   return (
-    <ul className="catalog">
-      {products.data.map((product) => {
-        const inCart = quantityOf(product.id);
-        const soldOut = product.stock === 0;
-        return (
-          <li key={product.id} className="catalog__item">
-            <h3>{product.title}</h3>
-            <p>{product.description}</p>
-            <p>{formatMoney(product.price)}</p>
-            <button
-              disabled={soldOut || setItem.isPending}
-              onClick={() => setItem.mutate({ productId: product.id, quantity: inCart + 1 })}
-            >
-              {soldOut ? 'Нет в наличии' : inCart ? `В корзине: ${inCart}` : 'В корзину'}
-            </button>
-          </li>
-        );
-      })}
-    </ul>
+    <>
+      <ul className="catalog">
+        {products.data.map((product) => {
+          const inCart = quantityByProductId.get(product.id) ?? 0;
+          const soldOut = product.stock === 0;
+          const atLimit = inCart >= product.stock;
+          return (
+            <li key={product.id} className="catalog__item">
+              <h3>{product.title}</h3>
+              <p>{product.description}</p>
+              <p>{formatMoney(product.price)}</p>
+              <button
+                disabled={soldOut || atLimit || setItem.isPending}
+                onClick={() => setItem.mutate({ productId: product.id, quantity: inCart + 1 })}
+              >
+                {soldOut
+                  ? 'Нет в наличии'
+                  : atLimit
+                    ? `В корзине: ${inCart} (максимум)`
+                    : inCart
+                      ? `В корзине: ${inCart}`
+                      : 'В корзину'}
+              </button>
+            </li>
+          );
+        })}
+      </ul>
+      {setItem.isError && <ErrorBanner error={setItem.error} />}
+    </>
   );
 }
