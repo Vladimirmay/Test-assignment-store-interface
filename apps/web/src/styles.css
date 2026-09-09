@@ -1,0 +1,90 @@
+:root {
+  color-scheme: light;
+  font-family: system-ui, sans-serif;
+}
+
+body {
+  margin: 0;
+}
+
+.app {
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 16px;
+}
+
+.app__header {
+  display: flex;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.catalog {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 16px;
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.catalog__item {
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  padding: 12px;
+}
+
+.cart__item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 0;
+  border-bottom: 1px solid #eee;
+}
+
+.cart__total {
+  font-weight: bold;
+}
+
+.error-banner {
+  color: #b00020;
+}
+
+.checkout {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  max-width: 480px;
+}
+
+.checkout fieldset {
+  border: 1px solid #ddd;
+  border-radius: 8px;
+}
+
+.form-field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-bottom: 8px;
+}
+
+.form-error {
+  color: #b00020;
+  font-size: 0.875em;
+}
+
+.checkout__summary {
+  font-size: 1.05em;
+}
+
+.payment-panel__card {
+  display: block;
+  margin-bottom: 4px;
+}
+
+.payment-panel__actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 8px;
+}
