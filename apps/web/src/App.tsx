@@ -8,8 +8,11 @@ export function App() {
   return (
     <div className="app">
       <header className="app__header">
-        <Link to="/">Каталог</Link>
-        <Link to="/cart">Корзина</Link>
+        <span className="app__brand">Магазин</span>
+        <nav className="app__nav">
+          <Link to="/">Каталог</Link>
+          <Link to="/cart">Корзина</Link>
+        </nav>
       </header>
       <main>
         <Routes>

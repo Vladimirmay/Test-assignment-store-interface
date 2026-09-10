@@ -60,7 +60,9 @@ export function CartPage() {
         />
       )}
       <p className="cart__total">Итого: {formatMoney(cart.data.subtotal)}</p>
-      <Link to="/checkout">Оформить заказ</Link>
+      <Link to="/checkout" className="button button--primary">
+        Оформить заказ
+      </Link>
     </div>
   );
 }
