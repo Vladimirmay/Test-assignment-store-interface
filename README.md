@@ -23,6 +23,8 @@ Swagger: [http://localhost:4000/docs/](http://localhost:4000/docs/). Специ�
 
 В Swagger выполните `POST /api/sessions` с телом `{}`. Скопируйте `data.token` в **Authorize**, без слова `Bearer`.
 
+Фронтенд запускается отдельно, команды — в [apps/web/README.md](apps/web/README.md).
+
 ## Структура
 
 ```text
@@ -33,7 +35,7 @@ docs/                 задание и документация
 scripts/              проверки
 ```
 
-Проект использует npm workspaces. Приложение в `apps/web` назовите `@checkout/web`. Добавьте команды запуска фронтенда в README своего решения. Пока его нет, `npm run dev` запускает только API.
+Проект использует npm workspaces. Фронтенд в `apps/web` — воркспейс `@checkout/web`, команды его запуска и сборки в [apps/web/README.md](apps/web/README.md). Корневой `npm run dev` запускает только API.
 
 ## Проверки
 
