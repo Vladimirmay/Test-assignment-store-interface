@@ -224,8 +224,9 @@ legend {
 
 .cart__item {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
-  gap: 12px;
+  gap: 8px 12px;
   padding: 14px 16px;
   border-bottom: 1px solid var(--color-border);
 }
@@ -239,12 +240,16 @@ legend {
   font-weight: 500;
 }
 
-@media (max-width: 480px) {
-  .cart__item {
-    flex-wrap: wrap;
-    gap: 8px 16px;
-  }
+.cart__item .error-banner {
+  flex: 1 1 100%;
+  margin: 4px 0 0;
+}
 
+.cart__item input[aria-invalid='true'] {
+  border-color: var(--color-danger);
+}
+
+@media (max-width: 480px) {
   .cart__item > span:first-child {
     flex: 1 1 100%;
   }

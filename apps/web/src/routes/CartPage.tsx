@@ -1,5 +1,5 @@
-import { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { useCallback, useEffect, useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 import type { Cart } from '@checkout/contracts';
 import { formatMoney } from '../lib/money';
 import { useCart, useRemoveCartItem, useSetCartItem } from '../queries/useCart';
@@ -8,16 +8,21 @@ import { Loading } from '../ui/Loading';
 
 type CartItemRowProps = {
   item: Cart['items'][number];
-  setItem: ReturnType<typeof useSetCartItem>;
-  removeItem: ReturnType<typeof useRemoveCartItem>;
+  onValidityChange: (productId: string, isValid: boolean) => void;
 };
 
-function CartItemRow({ item, setItem, removeItem }: CartItemRowProps) {
+function CartItemRow({ item, onValidityChange }: CartItemRowProps) {
   const [value, setValue] = useState(String(item.quantity));
+  const setItem = useSetCartItem();
+  const removeItem = useRemoveCartItem();
 
   useEffect(() => {
     setValue(String(item.quantity));
   }, [item.quantity]);
+
+  useEffect(() => {
+    onValidityChange(item.productId, !setItem.isError);
+  }, [setItem.isError, item.productId, onValidityChange]);
 
   const commit = () => {
     const quantity = Number(value);
@@ -41,6 +46,7 @@ function CartItemRow({ item, setItem, removeItem }: CartItemRowProps) {
           max={99}
           value={value}
           disabled={setItem.isPending}
+          aria-invalid={setItem.isError}
           onChange={(event) => setValue(event.target.value)}
           onBlur={commit}
           onKeyDown={(event) => {
@@ -52,14 +58,26 @@ function CartItemRow({ item, setItem, removeItem }: CartItemRowProps) {
       <button disabled={removeItem.isPending} onClick={() => removeItem.mutate(item.productId)}>
         Удалить
       </button>
+      {setItem.isError && <ErrorBanner error={setItem.error} />}
+      {removeItem.isError && <ErrorBanner error={removeItem.error} />}
     </li>
   );
 }
 
 export function CartPage() {
   const cart = useCart();
-  const setItem = useSetCartItem();
-  const removeItem = useRemoveCartItem();
+  const navigate = useNavigate();
+  const [invalidProductIds, setInvalidProductIds] = useState<Set<string>>(new Set());
+
+  const handleValidityChange = useCallback((productId: string, isValid: boolean) => {
+    setInvalidProductIds((prev) => {
+      if (isValid === !prev.has(productId)) return prev;
+      const next = new Set(prev);
+      if (isValid) next.delete(productId);
+      else next.add(productId);
+      return next;
+    });
+  }, []);
 
   if (cart.isPending) return <Loading label="Загружаем корзину…" />;
   if (cart.isError) return <ErrorBanner error={cart.error} onRetry={() => cart.refetch()} />;
@@ -75,22 +93,18 @@ export function CartPage() {
     <div className="cart">
       <ul>
         {cart.data.items.map((item) => (
-          <CartItemRow key={item.productId} item={item} setItem={setItem} removeItem={removeItem} />
+          <CartItemRow key={item.productId} item={item} onValidityChange={handleValidityChange} />
         ))}
       </ul>
-      {setItem.isError && (
-        <ErrorBanner error={setItem.error} onRetry={() => setItem.mutate(setItem.variables!)} />
-      )}
-      {removeItem.isError && (
-        <ErrorBanner
-          error={removeItem.error}
-          onRetry={() => removeItem.mutate(removeItem.variables!)}
-        />
-      )}
       <p className="cart__total">Итого: {formatMoney(cart.data.subtotal)}</p>
-      <Link to="/checkout" className="button button--primary">
+      <button
+        type="button"
+        className="button button--primary"
+        disabled={invalidProductIds.size > 0}
+        onClick={() => navigate('/checkout')}
+      >
         Оформить заказ
-      </Link>
+      </button>
     </div>
   );
 }
