@@ -11,7 +11,7 @@ npm ci
 npm run dev -w @checkout/web
 ```
 
-Открывается на [http://localhost:5173](http://localhost:5173), обращается к API на `http://127.0.0.1:4000` (меняется переменной `VITE_API_BASE_URL`).
+Открывается на [http://localhost:5173](http://localhost:5173), обращается к API на `http://127.0.0.1:4000`. Если API поднят на другом порту — скопируйте `.env.example` в `.env` и укажите `VITE_API_BASE_URL`.
 
 Сборка и предпросмотр:
 
