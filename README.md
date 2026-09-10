@@ -13,8 +13,8 @@
 Потребуются Node.js 24.x и npm 11.x. Отдельная база данных и ключи внешних сервисов не нужны.
 
 ```sh
-git clone https://github.com/instatdigital/frontend-checkout-challenge.git
-cd frontend-checkout-challenge
+git clone https://github.com/Vladimirmay/Test-assignment-store-interface.git
+cd Test-assignment-store-interface
 npm ci
 npm run dev
 ```
