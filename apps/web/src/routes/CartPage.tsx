@@ -1,8 +1,60 @@
+import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
+import type { Cart } from '@checkout/contracts';
 import { formatMoney } from '../lib/money';
 import { useCart, useRemoveCartItem, useSetCartItem } from '../queries/useCart';
 import { ErrorBanner } from '../ui/ErrorBanner';
 import { Loading } from '../ui/Loading';
+
+type CartItemRowProps = {
+  item: Cart['items'][number];
+  setItem: ReturnType<typeof useSetCartItem>;
+  removeItem: ReturnType<typeof useRemoveCartItem>;
+};
+
+function CartItemRow({ item, setItem, removeItem }: CartItemRowProps) {
+  const [value, setValue] = useState(String(item.quantity));
+
+  useEffect(() => {
+    setValue(String(item.quantity));
+  }, [item.quantity]);
+
+  const commit = () => {
+    const quantity = Number(value);
+    const isValid = Number.isInteger(quantity) && quantity >= 1 && quantity <= 99;
+    if (isValid && quantity !== item.quantity) {
+      setItem.mutate({ productId: item.productId, quantity });
+    } else {
+      setValue(String(item.quantity));
+      setItem.reset();
+    }
+  };
+
+  return (
+    <li className="cart__item">
+      <span>{item.title}</span>
+      <label>
+        Количество
+        <input
+          type="number"
+          min={1}
+          max={99}
+          value={value}
+          disabled={setItem.isPending}
+          onChange={(event) => setValue(event.target.value)}
+          onBlur={commit}
+          onKeyDown={(event) => {
+            if (event.key === 'Enter') event.currentTarget.blur();
+          }}
+        />
+      </label>
+      <span>{formatMoney(item.lineTotal)}</span>
+      <button disabled={removeItem.isPending} onClick={() => removeItem.mutate(item.productId)}>
+        Удалить
+      </button>
+    </li>
+  );
+}
 
 export function CartPage() {
   const cart = useCart();
@@ -23,31 +75,7 @@ export function CartPage() {
     <div className="cart">
       <ul>
         {cart.data.items.map((item) => (
-          <li key={item.productId} className="cart__item">
-            <span>{item.title}</span>
-            <label>
-              Количество
-              <input
-                type="number"
-                min={1}
-                max={99}
-                value={item.quantity}
-                disabled={setItem.isPending}
-                onChange={(event) => {
-                  const quantity = Number(event.target.value);
-                  if (quantity >= 1 && quantity <= 99)
-                    setItem.mutate({ productId: item.productId, quantity });
-                }}
-              />
-            </label>
-            <span>{formatMoney(item.lineTotal)}</span>
-            <button
-              disabled={removeItem.isPending}
-              onClick={() => removeItem.mutate(item.productId)}
-            >
-              Удалить
-            </button>
-          </li>
+          <CartItemRow key={item.productId} item={item} setItem={setItem} removeItem={removeItem} />
         ))}
       </ul>
       {setItem.isError && (

@@ -15,6 +15,10 @@ export class RequestError extends Error {
     this.fields = body?.error.fields;
     this.requestId = body?.meta.requestId;
   }
+
+  get isTransient(): boolean {
+    return this.status === 0 || this.status >= 500;
+  }
 }
 
 type RequestOptions = {
