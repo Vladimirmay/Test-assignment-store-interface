@@ -1,9 +1,5 @@
 import type { Cart } from '@checkout/contracts';
 
-/**
- * Not exported by @checkout/contracts as a TS type (only as a TypeBox schema),
- * so it's described here directly, per docs/ASSIGNMENT.md's suggestion.
- */
 export type Session = { id: string; token: string; cart: Cart };
 
 export type DeliveryMethodOption = {

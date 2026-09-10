@@ -6,7 +6,6 @@ import { pollUntil } from '../lib/polling';
 import { useSession } from '../session/SessionProvider';
 import { queryKeys } from './queryKeys';
 
-/** paymentStatus stays "pending" for both "attempt created" and "processing" — poll until it settles. */
 export function useOrder(orderId: string | undefined) {
   const { token } = useSession();
   return useQuery({

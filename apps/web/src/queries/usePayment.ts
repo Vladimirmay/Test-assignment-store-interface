@@ -5,7 +5,6 @@ import { pollUntil } from '../lib/polling';
 import { useSession } from '../session/SessionProvider';
 import { queryKeys } from './queryKeys';
 
-/** Only "processing" (a scenario was submitted) settles on its own — poll just that. */
 export function usePayment(paymentId: string | undefined) {
   const { token } = useSession();
   return useQuery({

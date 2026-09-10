@@ -10,8 +10,6 @@ export function CatalogPage() {
   const cart = useCart();
   const setItem = useSetCartItem();
 
-  // Built once per cart change so looking up a product's quantity below is O(1),
-  // not a linear .find() repeated for every product in the catalog.
   const quantityByProductId = useMemo(
     () => new Map(cart.data?.items.map((item) => [item.productId, item.quantity])),
     [cart.data],

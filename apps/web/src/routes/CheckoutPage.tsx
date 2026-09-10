@@ -17,7 +17,6 @@ import { useSession } from '../session/SessionProvider';
 import { ErrorBanner } from '../ui/ErrorBanner';
 import { Loading } from '../ui/Loading';
 
-/** A stale cart version means the quote can't be trusted — refetch the cart so the next quote attempt uses the truth. */
 function isStaleCartError(error: unknown): boolean {
   return (
     error instanceof RequestError && ['CART_VERSION_CONFLICT', 'QUOTE_EXPIRED'].includes(error.code)
@@ -92,8 +91,6 @@ export function CheckoutPage() {
         },
       },
     );
-    // Re-runs whenever the debounced delivery or the cart version changes — that's the whole trigger.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [debouncedDelivery, cart.data?.version]);
 
   if (cart.isPending || checkoutOptions.isPending) return <Loading label="Загружаем оформление…" />;

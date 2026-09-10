@@ -7,11 +7,6 @@ import { useSandbox } from '../queries/useSandbox';
 import { ErrorBanner } from '../ui/ErrorBanner';
 import { Loading } from '../ui/Loading';
 
-/**
- * Drives one card-payment attempt for an order: start, pick a test card, pay or cancel,
- * poll until it settles, retry with a fresh attempt after decline/cancel. Used both right
- * after checkout and on the order page when returning to a reload or a previously failed order.
- */
 export function PaymentPanel({ order }: { order: Order }) {
   const [paymentId, setPaymentId] = useState<string>();
   const [selectedCardId, setSelectedCardId] = useState<string>();

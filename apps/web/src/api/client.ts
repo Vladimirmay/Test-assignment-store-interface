@@ -2,7 +2,6 @@ import type { ApiError } from '@checkout/contracts';
 
 const BASE_URL = import.meta.env.VITE_API_BASE_URL ?? 'http://127.0.0.1:4000';
 
-/** Normalized shape for every failure: network, HTTP, and parse errors alike. */
 export class RequestError extends Error {
   readonly status: number;
   readonly code: string;
@@ -25,7 +24,6 @@ type RequestOptions = {
   idempotencyKey?: string;
 };
 
-/** The only place that talks to fetch. Components never see a raw Response. */
 export async function request<T>(path: string, options: RequestOptions = {}): Promise<T> {
   const { method = 'GET', body, token, idempotencyKey } = options;
   let response: Response;
@@ -38,8 +36,6 @@ export async function request<T>(path: string, options: RequestOptions = {}): Pr
         ...(idempotencyKey ? { 'Idempotency-Key': idempotencyKey } : {}),
       },
       body: body === undefined ? undefined : JSON.stringify(body),
-      // Without this a stalled connection (as opposed to an immediate refusal) hangs forever —
-      // the caller never gets an error back to show or let the user retry from.
       signal: AbortSignal.timeout(15000),
     });
   } catch (error) {
