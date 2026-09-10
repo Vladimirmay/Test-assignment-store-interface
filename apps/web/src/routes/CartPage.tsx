@@ -10,7 +10,7 @@ export function CartPage() {
   const removeItem = useRemoveCartItem();
 
   if (cart.isPending) return <Loading label="Загружаем корзину…" />;
-  if (cart.isError) return <ErrorBanner error={cart.error} />;
+  if (cart.isError) return <ErrorBanner error={cart.error} onRetry={() => cart.refetch()} />;
 
   if (cart.data.items.length === 0)
     return (
@@ -50,8 +50,14 @@ export function CartPage() {
           </li>
         ))}
       </ul>
-      {(setItem.isError || removeItem.isError) && (
-        <ErrorBanner error={setItem.error ?? removeItem.error} />
+      {setItem.isError && (
+        <ErrorBanner error={setItem.error} onRetry={() => setItem.mutate(setItem.variables!)} />
+      )}
+      {removeItem.isError && (
+        <ErrorBanner
+          error={removeItem.error}
+          onRetry={() => removeItem.mutate(removeItem.variables!)}
+        />
       )}
       <p className="cart__total">Итого: {formatMoney(cart.data.subtotal)}</p>
       <Link to="/checkout">Оформить заказ</Link>

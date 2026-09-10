@@ -1,6 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import type { Scenario } from '@checkout/contracts';
 import { createPayment, createSimulation, getPayment } from '../api/endpoints';
+import { pollUntil } from '../lib/polling';
 import { useSession } from '../session/SessionProvider';
 import { queryKeys } from './queryKeys';
 
@@ -11,7 +12,7 @@ export function usePayment(paymentId: string | undefined) {
     queryKey: queryKeys.payment(token, paymentId ?? ''),
     queryFn: () => getPayment(token, paymentId!),
     enabled: Boolean(paymentId),
-    refetchInterval: (query) => (query.state.data?.status === 'processing' ? 800 : false),
+    refetchInterval: pollUntil((payment) => payment?.status !== 'processing'),
   });
 }
 

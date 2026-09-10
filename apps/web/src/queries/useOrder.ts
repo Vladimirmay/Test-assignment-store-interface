@@ -2,6 +2,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useCallback } from 'react';
 import type { CreateOrder } from '@checkout/contracts';
 import { createOrder, getOrder } from '../api/endpoints';
+import { pollUntil } from '../lib/polling';
 import { useSession } from '../session/SessionProvider';
 import { queryKeys } from './queryKeys';
 
@@ -12,7 +13,7 @@ export function useOrder(orderId: string | undefined) {
     queryKey: queryKeys.order(token, orderId ?? ''),
     queryFn: () => getOrder(token, orderId!),
     enabled: Boolean(orderId),
-    refetchInterval: (query) => (query.state.data?.paymentStatus === 'pending' ? 800 : false),
+    refetchInterval: pollUntil((order) => order?.paymentStatus !== 'pending'),
   });
 }
 

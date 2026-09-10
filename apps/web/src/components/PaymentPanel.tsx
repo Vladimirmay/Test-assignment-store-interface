@@ -33,29 +33,31 @@ export function PaymentPanel({ order }: { order: Order }) {
     setSelectedCardId(undefined);
   };
 
+  const startPayment = () =>
+    createPayment.mutate(
+      { orderId: order.id, idempotencyKey: keyRef.current },
+      { onSuccess: (created) => setPaymentId(created.id) },
+    );
+
   if (!paymentId) {
     return (
       <div>
-        <button
-          disabled={createPayment.isPending}
-          onClick={() =>
-            createPayment.mutate(
-              { orderId: order.id, idempotencyKey: keyRef.current },
-              { onSuccess: (created) => setPaymentId(created.id) },
-            )
-          }
-        >
+        <button disabled={createPayment.isPending} onClick={startPayment}>
           Оплатить картой
         </button>
-        {createPayment.isError && <ErrorBanner error={createPayment.error} />}
+        {createPayment.isError && (
+          <ErrorBanner error={createPayment.error} onRetry={startPayment} />
+        )}
       </div>
     );
   }
 
   if (payment.isPending) return <Loading label="Открываем платёжную форму…" />;
-  if (payment.isError) return <ErrorBanner error={payment.error} />;
+  if (payment.isError)
+    return <ErrorBanner error={payment.error} onRetry={() => payment.refetch()} />;
   if (sandbox.isPending) return <Loading label="Загружаем тестовые карты…" />;
-  if (sandbox.isError) return <ErrorBanner error={sandbox.error} />;
+  if (sandbox.isError)
+    return <ErrorBanner error={sandbox.error} onRetry={() => sandbox.refetch()} />;
 
   const status = payment.data.status;
 

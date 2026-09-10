@@ -18,7 +18,8 @@ export function CatalogPage() {
   );
 
   if (products.isPending) return <Loading label="Загружаем каталог…" />;
-  if (products.isError) return <ErrorBanner error={products.error} />;
+  if (products.isError)
+    return <ErrorBanner error={products.error} onRetry={() => products.refetch()} />;
 
   return (
     <>
@@ -48,7 +49,9 @@ export function CatalogPage() {
           );
         })}
       </ul>
-      {setItem.isError && <ErrorBanner error={setItem.error} />}
+      {setItem.isError && (
+        <ErrorBanner error={setItem.error} onRetry={() => setItem.mutate(setItem.variables!)} />
+      )}
     </>
   );
 }

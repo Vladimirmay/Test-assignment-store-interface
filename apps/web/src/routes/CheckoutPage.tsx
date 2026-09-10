@@ -97,8 +97,9 @@ export function CheckoutPage() {
   }, [debouncedDelivery, cart.data?.version]);
 
   if (cart.isPending || checkoutOptions.isPending) return <Loading label="Загружаем оформление…" />;
-  if (cart.isError) return <ErrorBanner error={cart.error} />;
-  if (checkoutOptions.isError) return <ErrorBanner error={checkoutOptions.error} />;
+  if (cart.isError) return <ErrorBanner error={cart.error} onRetry={() => cart.refetch()} />;
+  if (checkoutOptions.isError)
+    return <ErrorBanner error={checkoutOptions.error} onRetry={() => checkoutOptions.refetch()} />;
   if (cart.data.items.length === 0)
     return (
       <p>
@@ -155,7 +156,7 @@ export function CheckoutPage() {
             {...register('email', { required: 'Укажите email', pattern: /^\S+@\S+\.\S+$/ })}
           />
           {errors.email && (
-            <span className="form-error">{errors.email.message ?? 'Некорректный email'}</span>
+            <span className="form-error">{errors.email.message || 'Некорректный email'}</span>
           )}
         </label>
         <label className="form-field">
@@ -166,7 +167,7 @@ export function CheckoutPage() {
             {...register('phone', { required: 'Укажите телефон', pattern: /^\+[1-9]\d{9,14}$/ })}
           />
           {errors.phone && (
-            <span className="form-error">{errors.phone.message ?? 'Формат: +79990000000'}</span>
+            <span className="form-error">{errors.phone.message || 'Формат: +79990000000'}</span>
           )}
         </label>
       </fieldset>

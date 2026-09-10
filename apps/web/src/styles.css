@@ -47,7 +47,15 @@ body {
 }
 
 .error-banner {
+  display: flex;
+  align-items: center;
+  gap: 8px;
   color: #b00020;
+}
+
+.error-banner__retry {
+  color: #b00020;
+  border-color: #b00020;
 }
 
 .checkout {

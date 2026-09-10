@@ -10,7 +10,7 @@ export function OrderStatusPage() {
   const order = useOrder(orderId);
 
   if (order.isPending) return <Loading label="Загружаем заказ…" />;
-  if (order.isError) return <ErrorBanner error={order.error} />;
+  if (order.isError) return <ErrorBanner error={order.error} onRetry={() => order.refetch()} />;
 
   const data = order.data;
   const settled = data.paymentMethod === 'cash_on_delivery' || data.paymentStatus === 'succeeded';

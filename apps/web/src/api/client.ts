@@ -38,9 +38,17 @@ export async function request<T>(path: string, options: RequestOptions = {}): Pr
         ...(idempotencyKey ? { 'Idempotency-Key': idempotencyKey } : {}),
       },
       body: body === undefined ? undefined : JSON.stringify(body),
+      // Without this a stalled connection (as opposed to an immediate refusal) hangs forever —
+      // the caller never gets an error back to show or let the user retry from.
+      signal: AbortSignal.timeout(15000),
     });
-  } catch {
-    throw new RequestError(0, undefined, 'Проверьте подключение к сети.');
+  } catch (error) {
+    const timedOut = error instanceof DOMException && error.name === 'TimeoutError';
+    throw new RequestError(
+      0,
+      undefined,
+      timedOut ? 'Сервер не отвечает. Попробуйте ещё раз.' : 'Проверьте подключение к сети.',
+    );
   }
 
   if (response.status === 204) return undefined as T;
